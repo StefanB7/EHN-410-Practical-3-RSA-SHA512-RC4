@@ -4,6 +4,7 @@
 #Group 7 - Created 21 May 2021
 
 import struct
+import numpy as np
 
 class SHA512(object):
     _message = None
@@ -70,7 +71,8 @@ class SHA512(object):
         self._paddedLength = len(self._message)
 
         #Add the length of the message to the end of the message:
-        lengthBytearray = self._messageLength.to_bytes(16, byteorder="big", signed=False)
+        messageBitLength = self._messageLength*8
+        lengthBytearray = messageBitLength.to_bytes(16, byteorder="big", signed=False)
         for i in range(len(lengthBytearray)):
             self._message.append(lengthBytearray[i])
 
@@ -82,16 +84,27 @@ class SHA512(object):
 
         #The first 16 values are taken from the input as is:
         for i in range(16):
-            w[i] = struct.unpack("!1Q", inputBytearray[i*8:(i+1)*8])
+            w[i] = struct.unpack("!1Q", inputBytearray[i*8:(i+1)*8])[0]
 
         #The rest of the values are calculated according to the key schedule
+        for i in range(16,80):
+            temp1 = self.rotateRight(w[i-2], 19) ^ self.rotateRight(w[i-2], 61) ^ self.shiftRight(w[i-2], 6)
+            temp2 = self.rotateRight(w[i-15], 1) ^ self.rotateRight(w[i-15], 8) ^ self.shiftRight(w[i-15], 7)
+
+            w[i] = (temp1 + w[i-7] + temp2 + w[i-16]) % (2**64) #2^64
+            w[i] = w[i] & 0xFFFFFFFFFFFFFFFF #Output should only be 64 bits
+
+
 
         print(w)
 
     def rotateRight(self, value, numPositions):
         return ((value >> numPositions) | (value << (64 - numPositions))) & 0xFFFFFFFFFFFFFFFF
 
-toets = SHA512("Hello")
+    def shiftRight(self, value, numPositions):
+        return value >> numPositions
+
+toets = SHA512("abc")
 print(toets._message)
 
 print(len(toets._message))
