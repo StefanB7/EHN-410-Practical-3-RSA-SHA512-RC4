@@ -91,9 +91,46 @@ class SHA512(object):
             temp1 = self.rotateRight(w[i-2], 19) ^ self.rotateRight(w[i-2], 61) ^ self.shiftRight(w[i-2], 6)
             temp2 = self.rotateRight(w[i-15], 1) ^ self.rotateRight(w[i-15], 8) ^ self.shiftRight(w[i-15], 7)
 
-            w[i] = (temp1 + w[i-7] + temp2 + w[i-16]) % (2**64) #2^64
-            w[i] = w[i] & 0xFFFFFFFFFFFFFFFF #Output should only be 64 bits
+            w[i] = (temp1 + w[i-7] + temp2 + w[i-16])
+            w[i] = w[i] & 0xFFFFFFFFFFFFFFFF #Output should only modulo 2^64
 
+        #Message schedule generated
+
+        #Assign the buffer to the corresponding letters:
+        a, b, c, d, e, f, g, h = self._hashBuffer
+
+        #Iterate over the 80 SHA rounds:
+        for i in range(80):
+            ch = (e & f) ^ ((~e) & g)
+            maj = (a & b) ^ (a & c) ^ (b & c)
+            sumE = self.rotateRight(e, 14) ^ self.rotateRight(e, 18) ^ self.rotateRight(e, 41)
+            sumA = self.rotateRight(a, 28) ^ self.rotateRight(a, 34) ^ self.rotateRight(a, 39)
+            t1 = (h + ch + sumE + w[i] + self._k[i]) & 0xFFFFFFFFFFFFFFFF
+            t2 = (sumA + maj) & 0xFFFFFFFFFFFFFFFF
+            h = g
+            g = f
+            f = e
+            e = (d + t1) & 0xFFFFFFFFFFFFFFFF
+            d = c
+            c = b
+            b = a
+            a = (t1 + t2) & 0xFFFFFFFFFFFFFFFF
+
+            tempbuffer = [hex(a), hex(b), hex(c), hex(d), hex(e), hex(f), hex(g), hex(h)]
+            if i < 3:
+                print("Temp buffer " + str(i))
+                print(tempbuffer)
+
+        #Once the rounds have completed, update the buffer with the xor of the calculated values with the previous
+        #buffer state:
+        tempbuffer = [a, b, c, d, e, f, g, h]
+
+        for i in range(8):
+            self._hashBuffer[i] = (self._hashBuffer[i] + tempbuffer[i]) & 0xFFFFFFFFFFFFFFFF
+
+        tempbuffer = [hex(thing) for thing in self._hashBuffer]
+
+        print(tempbuffer)
 
 
         print(w)
