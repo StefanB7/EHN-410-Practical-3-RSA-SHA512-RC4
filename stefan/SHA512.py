@@ -28,7 +28,7 @@ class SHA512(object):
           0x5fcb6fab3ad6faec,0x6c44198c4a475817]
 
     def __init__(self, InputMessage = None):
-        if not(InputMessage == None):
+        if not(InputMessage is None):
             self.setMessage(InputMessage)
 
 
@@ -67,16 +67,16 @@ class SHA512(object):
         for i in range(numtoAdd):
             self._message.append(0x00)
 
-        #Update the padded message length:
-        self._paddedLength = len(self._message)
-
         #Add the length of the message to the end of the message:
         messageBitLength = self._messageLength*8
         lengthBytearray = messageBitLength.to_bytes(16, byteorder="big", signed=False)
         for i in range(len(lengthBytearray)):
             self._message.append(lengthBytearray[i])
 
-        self.calculateSingleHash(self._message)
+        #Update the padded message length:
+        self._paddedLength = len(self._message)
+
+
 
     def calculateSingleHash(self, inputBytearray):
         #Calculate the message key schedule:
@@ -116,10 +116,10 @@ class SHA512(object):
             b = a
             a = (t1 + t2) & 0xFFFFFFFFFFFFFFFF
 
-            tempbuffer = [hex(a), hex(b), hex(c), hex(d), hex(e), hex(f), hex(g), hex(h)]
-            if i < 3:
-                print("Temp buffer " + str(i))
-                print(tempbuffer)
+            # tempbuffer = [hex(a), hex(b), hex(c), hex(d), hex(e), hex(f), hex(g), hex(h)]
+            # if i < 3:
+            #     print("Temp buffer " + str(i))
+            #     print(tempbuffer)
 
         #Once the rounds have completed, update the buffer with the xor of the calculated values with the previous
         #buffer state:
@@ -130,10 +130,22 @@ class SHA512(object):
 
         tempbuffer = [hex(thing) for thing in self._hashBuffer]
 
-        print(tempbuffer)
+        #print(tempbuffer)
 
 
-        print(w)
+        #print(w)
+
+    def calculateHash(self):
+        if self._message is None:
+            raise Exception("SHA512 Hash: Please assign a message before performing a hash")
+
+        numIterations = self._paddedLength // 128
+
+        for i in range(numIterations):
+            self.calculateSingleHash(self._message[i*128:(i+1)*128])
+
+        return self._hashBuffer
+
 
     def rotateRight(self, value, numPositions):
         return ((value >> numPositions) | (value << (64 - numPositions))) & 0xFFFFFFFFFFFFFFFF
@@ -141,7 +153,9 @@ class SHA512(object):
     def shiftRight(self, value, numPositions):
         return value >> numPositions
 
-toets = SHA512("abc")
+toets = SHA512("YqxFFt0Z6STVEAodS4a2qpTR3TPaHN7HFZQaHBKlL0o6khzNdgJefPjeoaxIBC6G8NkPEF8DUNGqOe5EM1YeRNvFa0jTdeCzQtxq7MFMSVCXx2qcLDUj2J36GSoSmbNad1axLp2IPKpSTgMrfNiWPtRhAc0fZy3sXv3khfzqT625pFTlKP7MUuk4qJK2dDcOsFwdCntU6foSAoVXqywFPQnMBnKndl8zwSW0fwkgKeqz1puviUUoHDbpoft3LtkT4k5FMW2D8E33ORQCzmwAN41ni7M7pVZx5ccYTkgvEHoNSKb0pJvNXkTjiTFbJh0HohKur5v0NJTo7HQW8UbOCTwRGBJpQMEPptncGH1v2yTPmz1Ea6mBo5thdtQ3oYv2uGXMwLIXgltwQd1lrfrKO1CbwZGuThsqysTOkydkiSY6MC8QbjQSlBojtRcRMfCIdraGyIROuvnF5NyNPaDcXuM2gEtmqnnluwMvPNx1U01UxQCFdWd9FinzjcIaZyOnyiXX7NDo0S3FeHhzStpeKxUG2qQL90T2g7OYbcq5I3m6rssbJ7BcVwNF721bjCKEbOnPXHuiqal4POn6pLSKl1ub1MHZZmu7oPWc0HhVWncJgiSrs")
 print(toets._message)
-
 print(len(toets._message))
+
+print("Output:")
+print([hex(thing) for thing in toets.calculateHash()])
