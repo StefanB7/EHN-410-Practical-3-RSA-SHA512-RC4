@@ -5,6 +5,7 @@
 
 import struct
 import numpy as np
+from PIL import Image
 
 class SHA512(object):
     _message = None
@@ -33,6 +34,7 @@ class SHA512(object):
 
 
     def setMessage(self, InputMessage):
+        #If the input is a string:
         if isinstance(InputMessage, str):
             # Update the length of the internal message:
             self._messageLength = len(InputMessage)
@@ -44,6 +46,28 @@ class SHA512(object):
 
             #Pad the message:
             self.padMessage()
+
+        #If the input is an image (ndarray):
+        elif isinstance(InputMessage, np.ndarray):
+            # Check the inputs's dimentions:
+            numRows = InputMessage.shape[0]
+            numColumns = InputMessage.shape[1]
+            numLayers = InputMessage.shape[2]
+
+            self._message = bytearray(numRows*numColumns*numLayers)
+            self._messageLength = numRows*numColumns*numLayers
+
+            #Populate the stored message bytearray:
+            index = 0
+            for layer in range(numLayers):
+                for row in range(numRows):
+                    for column in range(numColumns):
+                        self._message[index] = InputMessage[row][column][layer]
+                        index += 1
+
+            #Pad the message:
+            self.padMessage()
+
         else:
             raise Exception("SHA512 Hash: Invalid data type passed")
 
@@ -130,11 +154,6 @@ class SHA512(object):
 
         tempbuffer = [hex(thing) for thing in self._hashBuffer]
 
-        #print(tempbuffer)
-
-
-        #print(w)
-
     def calculateHash(self):
         if self._message is None:
             raise Exception("SHA512 Hash: Please assign a message before performing a hash")
@@ -157,5 +176,12 @@ toets = SHA512("YqxFFt0Z6STVEAodS4a2qpTR3TPaHN7HFZQaHBKlL0o6khzNdgJefPjeoaxIBC6G
 print(toets._message)
 print(len(toets._message))
 
-print("Output:")
+
 print([hex(thing) for thing in toets.calculateHash()])
+
+p_File = Image.open('office.png')
+p_img = np.asarray(p_File)
+sha = SHA512(p_img)
+output = sha.calculateHash()
+print("Output:")
+print([hex(thing) for thing in output])
