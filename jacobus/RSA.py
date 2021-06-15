@@ -151,48 +151,50 @@ def encryptRSA(s):
     blocksize = 16 # 2 bytes
     pq = getRandomPrimes(2**blocksize,2**(blocksize + 1))
 
-    # 1st prime number
-    p = 17
-    #p = pq[0]
+    print(pq)
 
-    # 2nd prime number
-    q = 11
-    #q = pq[1]
+#     # 1st prime number
+#     p = 17
+#     #p = pq[0]
 
-    # n calculated pow(2, i) < n <= pow(2, i + 1), i -> block size
-    n = 11023
-    # n = p*q
+#     # 2nd prime number
+#     q = 11
+#     #q = pq[1]
 
-    # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
-    e = 11
-    # e = getE(ETF(p,q),p,q)
+#     # n calculated pow(2, i) < n <= pow(2, i + 1), i -> block size
+#     n = 11023
+#     # n = p*q
 
-    # Private key {d,n}, d calculated
-    d = 5891
-    # d = inverseModulo(e,ETF(p,q))
+#     # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
+#     e = 11
+#     # e = getE(ETF(p,q),p,q)
 
-    enc = []
-    # check dat alle blocks encrypt word!!
-    for i in range(len(plain)//2):
-        P = int(str(plain[2*i]).zfill(2) + str(plain[2*i +1]).zfill(2))
-        print("P"+str(i)+" : "+str(P))
-        enc.append(powz(P,e,n))
-        print("C"+str(i)+" : "+str(enc[len(enc)-1])+"\n")
+#     # Private key {d,n}, d calculated
+#     d = 5891
+#     # d = inverseModulo(e,ETF(p,q))
+
+#     enc = []
+#     # check dat alle blocks encrypt word!!
+#     for i in range(len(plain)//2):
+#         P = int(str(plain[2*i]).zfill(2) + str(plain[2*i +1]).zfill(2))
+#         print("P"+str(i)+" : "+str(P))
+#         enc.append(powz(P,e,n))
+#         print("C"+str(i)+" : "+str(enc[len(enc)-1])+"\n")
     
-    print("encrypted ", enc)
+#     print("encrypted ", enc)
 
 
-    dec = []
-    for j in range(len(enc)):
-        print("C"+str(j)+" : "+str(enc[j]))
-        P = powz(enc[j],d,n)
-        print("P"+str(j)+" : "+str(P).zfill(4)+"\n")
-        dec.append(int(str(P).zfill(4)[:2]))
-        dec.append(int(str(P).zfill(4)[2:]))
+#     dec = []
+#     for j in range(len(enc)):
+#         print("C"+str(j)+" : "+str(enc[j]))
+#         P = powz(enc[j],d,n)
+#         print("P"+str(j)+" : "+str(P).zfill(4)+"\n")
+#         dec.append(int(str(P).zfill(4)[:2]))
+#         dec.append(int(str(P).zfill(4)[2:]))
 
-    print("decrypted ",dec)
+#     print("decrypted ",dec)
 
-encryptRSA("a")
+# encryptRSA("a")
 
 
 

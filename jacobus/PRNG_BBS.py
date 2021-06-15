@@ -1,4 +1,7 @@
 # Blum Blum Shub - PRNG
+# EHN 410 - Practical 3 - 2021
+# Stefan Buys, Jacobus Oettle
+# Group 7 - Created 15 June 2021
 
 # Permission granted by Gustan Naude
 import time
@@ -51,7 +54,10 @@ class PRNG_BBS:
             if self.extended_euclidean_algo(testS,max)[0] == 1:
                 return testS
     
-    def getRandomNumber(self, digits=None):
+    def getRandomNumberDigits(self, digits=None):
+
+        # seed that is relative prime to n
+        self.s = self.getSeed(self.p,self.q)
 
         if digits is not None:
             self.numDigits = digits
@@ -78,10 +84,31 @@ class PRNG_BBS:
         rndNumber = (int(bits,2) % (rndMax-rndMin+1)) + rndMin
 
         return rndNumber
+    
+    def getRandomNumberRange(self, min, max):
 
+        # seed that is relative prime to n
+        self.s = self.getSeed(self.p,self.q)
 
-# Testing
-# BBS = PRNG_BBS()
+        # Generate ceil(log2((10^numDigits)-1)) bits and then scale to the 10^(numDigits-1) to (10^numDigits)-1 range using
+        # (random % (max-min+1))+min
 
-# for i in range(20):
-#     print(BBS.getRandomNumber(i+1))
+        # Get number of bits by checking the amount of bits in (10^numDigits)-1 
+        numBits = len(bin(max)[2:])
+
+        rndMax = max
+        rndMin = min
+
+        x = []
+        b = []
+        x.append(self.s**2 % self.n)
+
+        bits = ""
+        for i in range(numBits):
+            x.append(x[len(x)-1]**2 % self.n)
+            b.append(x[len(x)-1] % 2)
+            bits += str(b[len(b)-1])
+
+        rndNumber = (int(bits,2) % (rndMax-rndMin+1)) + rndMin
+
+        return rndNumber
