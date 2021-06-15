@@ -6,8 +6,10 @@
 # check lengte van n teenoor die lengte van die boodskap (of die byets wat encrypt moet word) 
 
 
-
+from PRNG_BBS import PRNG_BBS
 import numpy as np
+
+BBS = PRNG_BBS()
 
 # exploit modular arightmatic properties om exponents vinniger uit te werk p 299
 # exploit CRT vir private key goed p300
@@ -26,16 +28,21 @@ def getRandomPrimes(a,b):
 
     result = []
 
-    for i in range(2):
-        i = np.random.randint(minRange,maxRange) 
-        r = miller_rabin(i,4)
+    while len(result) != 2:
         
+        i = BBS.getRandomNumberRange(int(minRange),int(maxRange)-1) #np.random.randint(minRange,maxRange)
+        r = miller_rabin(i,4)
+
         # find random number in the given range
         while r == False:
-            i = np.random.randint(minRange,maxRange)
+            i = BBS.getRandomNumberRange(int(minRange),int(maxRange)-1) #np.random.randint(minRange,maxRange)
             r = miller_rabin(i,4)
         
-        result.append(i)
+        if len(result) == 1:
+            if result[0] != i:
+                result.append(i)
+        else:
+            result.append(i)
 
     return result
 
@@ -65,7 +72,7 @@ def miller_rabin(n, rounds):
         k = k +1
     
     for r in range(rounds):
-        a = np.random.randint(2,n-1) # random int between and including 2 and n-2
+        a = BBS.getRandomNumberRange(2,n-2) #np.random.randint(2,n-1) # random int between and including 2 and n-2
         comp = True
         if a**q % n == 1:
             comp = False # probably prime
@@ -194,7 +201,7 @@ def encryptRSA(s):
 
 #     print("decrypted ",dec)
 
-# encryptRSA("a")
+encryptRSA("a")
 
 
 

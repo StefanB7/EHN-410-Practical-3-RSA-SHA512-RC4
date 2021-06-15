@@ -94,7 +94,7 @@ class PRNG_BBS:
         # (random % (max-min+1))+min
 
         # Get number of bits by checking the amount of bits in (10^numDigits)-1 
-        numBits = len(bin(max)[2:])
+        numBits = len(bin(int(max))[2:])
 
         rndMax = max
         rndMin = min
