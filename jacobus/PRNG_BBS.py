@@ -53,41 +53,11 @@ class PRNG_BBS:
         min = max // 2
 
         while True:
-            testS = ((round(time.time()*1000)**3 + self.seedInc) % (max-min+1)) + min
+            testS = pow(round(time.time()*1000)+self.seedInc,3,max-min+1) + min
+
             if self.extended_euclidean_algo(testS,max)[0] == 1:
                 self.seedInc = (self.seedInc + 1) % round(time.time()*1000)
                 return testS
-    
-    def getRandomNumberDigits(self, digits=None):
-
-        # seed that is relative prime to n
-        self.s = self.getSeed(self.p,self.q)
-
-        if digits is not None:
-            self.numDigits = digits
-
-        # Generate ceil(log2((10^numDigits)-1)) bits and then scale to the 10^(numDigits-1) to (10^numDigits)-1 range using
-        # (random % (max-min+1))+min
-
-        # Get number of bits by checking the amount of bits in (10^numDigits)-1 
-        numBits = len(bin(10**self.numDigits-1)[2:])
-
-        rndMax = 10**(self.numDigits-1)
-        rndMin = (10**self.numDigits)-1
-
-        x = []
-        b = []
-        x.append(self.s**2 % self.n)
-
-        bits = ""
-        for i in range(numBits):
-            x.append(x[len(x)-1]**2 % self.n)
-            b.append(x[len(x)-1] % 2)
-            bits += str(b[len(b)-1])
-
-        rndNumber = (int(bits,2) % (rndMax-rndMin+1)) + rndMin
-
-        return rndNumber
     
     def getRandomNumberRange(self, min, max):
 
@@ -105,11 +75,11 @@ class PRNG_BBS:
 
         x = []
         b = []
-        x.append(self.s**2 % self.n)
+        x.append(pow(self.s,2,self.n))
 
         bits = ""
         for i in range(numBits):
-            x.append(x[len(x)-1]**2 % self.n)
+            x.append(pow(x[len(x)-1],2,self.n))
             b.append(x[len(x)-1] % 2)
             bits += str(b[len(b)-1])
 
