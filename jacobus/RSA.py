@@ -1,44 +1,102 @@
 # RSA
 
-
 # moet kan random getalle generate van n sekere lengte (bv 5 of 6 digiits) GLOBAL variable!
 
 # check lengte van n teenoor die lengte van die boodskap (of die byets wat encrypt moet word) 
 
+# skyrf in report hvl round van die miller rabin jy moet doen check 302 vir hvl rondtes connect dit met hoe groot prime gesoek word
+
+# https://crypto.stackexchange.com/questions/10805/how-does-one-deal-with-a-negative-d-in-rsa
 
 from PRNG_BBS import PRNG_BBS
 import numpy as np
 
 class RSA:
-    def __init__(self):
-
+    def __init__(self,primeDigits,blocksize=16,p=None,q=None,e=None,d=None):
         self.BBS = PRNG_BBS()
 
-    # Euler totient function for prime numbers
-    def ETF(self,a,b): 
-        return (a-1)*(b-1)
+        if p is None:
+            pq = self.getRandomPrimes(blocksize,primeDigits)
 
-    # get random prime numbers in the range 2^i < n <= 2^(i+1), a < n1*n2 <= b
-    def getRandomPrimes(self,a,b):
+            # 1st prime number
+            self.p = pq[0]
+
+            # 2nd prime number
+            self.q = pq[1]
+
+            self.n = self.p * self.q
+
+            ed = self.getEandD(self.ETF(self.p,self.q))
+
+            # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
+            self.e = ed[0]
+
+            # Private key {d,n}, d calculated
+            self.d = ed[1]
+
+
+            print("self.p = ",self.p)
+            print("self.q = ",self.q)
+            print("self.n = ",self.n)
+            print("self.e = ",self.e)
+            print("self.d = ",self.d)
+
+        else:
+            # 1st prime number
+            self.p = p
+
+            # 2nd prime number
+            self.q = q
+
+            self.n = self.p * self.q
+
+            # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
+            self.e = e
+
+            # Private key {d,n}, d calculated
+            self.d = d
+
+    # Euler totient function for prime numbers
+    def ETF(self,p,q): 
+        return (p-1)*(q-1)
+
+    # get random prime numbers in the range 2^i < n <= 2^(i+1), a < p*q <= b
+    def getRandomPrimes(self,blocksize,length):
+
+        minLength = len(str(int(np.ceil(np.sqrt(2**blocksize)))))
 
         # Since the two primes must be in a certain range the min and max values for both can be calculated:
-        minRange = np.ceil(np.sqrt(a))
-        maxRange = np.floor(np.sqrt(b))
+        # Min value for primes is still set by the blocksize
+        if length < minLength:
+            print("\nWARNING: Length chosen is smaller than minimum length set by blocksize...")
+            print("Min length set to: ",minLength)
+            print("")
+            length = minLength
+            minRange = np.ceil(np.sqrt(2**blocksize))
+        elif length > minLength:
+            minRange = 10**(length-1)
+        else:
+            minRange = np.ceil(np.sqrt(2**blocksize))
+        
+        # Max length set by length
+        maxRange = (10**length)-1
 
         result = []
 
         while len(result) != 2:
             
-            i = self.BBS.getRandomNumberRange(int(minRange),int(maxRange)-1) #np.random.randint(minRange,maxRange)
-            r = self.miller_rabin(i,4)
+            i = self.BBS.getRandomNumberRange(int(minRange),int(maxRange))
+            r = self.miller_rabin(i,10)
 
             # find random number in the given range
             while r == False:
-                i = self.BBS.getRandomNumberRange(int(minRange),int(maxRange)-1) #np.random.randint(minRange,maxRange)
-                r = self.miller_rabin(i,4)
+                i = self.BBS.getRandomNumberRange(int(minRange),int(maxRange))
+                r = self.miller_rabin(i,10)
+            
             
             if len(result) == 1:
-                if result[0] != i:
+                # ensure two different primes, and fit in the range
+                if result[0] != i and result[0]*i > minRange:
                     result.append(i)
             else:
                 result.append(i)
@@ -71,14 +129,14 @@ class RSA:
             k = k +1
         
         for r in range(rounds):
-            a = self.BBS.getRandomNumberRange(2,n-2) #np.random.randint(2,n-1) # random int between and including 2 and n-2
+            a = self.BBS.getRandomNumberRange(2,n-2) # random int between and including 2 and n-2 
             comp = True
-            if a**q % n == 1:
+            if self.powz(a,q,n) == 1:
                 comp = False # probably prime
                 continue
 
             for j in range(k): # range 0 to k-1
-                if a**((2**j)*q) % n == n-1:
+                if self.powz(a,((2**j)*q),n) == n-1:
                     comp = False # probably prime
                     continue
         
@@ -89,6 +147,7 @@ class RSA:
 
     # get GCD
     def extended_euclidean_algo(self,a,b):
+
         # Base Case 
         if a == 0 :  
             return b,0,1
@@ -96,33 +155,26 @@ class RSA:
         # print("ri ",a)
         # print("q ", (b//a))
         gcd,x1,y1 = self.extended_euclidean_algo(b%a, a) 
-        
+
         # Update x and y using results of recursive 
         # call 
         x = y1 - (b//a) * x1 
         y = x1 
         
+        # print("X1 ",x1)
+        # print("Y1 ",y1)
+        # print("X ",x)
+        # print("Y ",y)
         return gcd,x,y
 
     # get largest value that is coprime
-    def getE(self,max,p,q):
-        
-        # test if this value works
-        if self.extended_euclidean_algo(65537,self.ETF(p,q))[0] == 1:
-            return 65537
-        
-
-        for j in range(max,-1,-1):
-            if self.extended_euclidean_algo(j,self.ETF(p,q))[0] == 1:
-                return j
-
-    # Multiplicative inverse 
-    def inverseModulo(self, a,phi):
-        for i in range(1,phi):
-            if (a*i)%phi == 1:
-                return i
-        
-        print("NO inverse!")
+    def getEandD(self,phi):
+        for e in range(phi-2,-1,-1):
+            if self.extended_euclidean_algo(e,phi)[0] == 1:
+                d = self.extended_euclidean_algo(e,phi)[1]
+                while d < 0:
+                    d = d + phi
+                return [e,d]
 
     # a^b mod n
     def powz(self,a,b,n):
@@ -143,74 +195,32 @@ class RSA:
 
         # return np.array(bytearray(strText.encode(encoding="ascii")),dtype=np.ubyte)
 
-    def encryptRSA(self,s):
-
+    def encryptRSA(self,plain):
 
         plain = [33,14,22,62,0,17,4,62,24,14,20,66]
 
-
-
-        blocksize = 16 # 2 bytes
-        pq = self.getRandomPrimes(2**blocksize,2**(blocksize + 1))
-
-        print(pq)
-
-    #     # 1st prime number
-    #     p = 17
-    #     #p = pq[0]
-
-    #     # 2nd prime number
-    #     q = 11
-    #     #q = pq[1]
-
-    #     # n calculated pow(2, i) < n <= pow(2, i + 1), i -> block size
-    #     n = 11023
-    #     # n = p*q
-
-    #     # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
-    #     e = 11
-    #     # e = getE(ETF(p,q),p,q)
-
-    #     # Private key {d,n}, d calculated
-    #     d = 5891
-    #     # d = inverseModulo(e,ETF(p,q))
-
-    #     enc = []
-    #     # check dat alle blocks encrypt word!!
-    #     for i in range(len(plain)//2):
-    #         P = int(str(plain[2*i]).zfill(2) + str(plain[2*i +1]).zfill(2))
-    #         print("P"+str(i)+" : "+str(P))
-    #         enc.append(powz(P,e,n))
-    #         print("C"+str(i)+" : "+str(enc[len(enc)-1])+"\n")
+        enc = []
+        # check dat alle blocks encrypt word!!
+        for i in range(len(plain)//2):
+            P = int(str(plain[2*i]).zfill(2) + str(plain[2*i +1]).zfill(2))
+            print("P"+str(i)+" : "+str(P))
+            enc.append(self.powz(P,self.e,self.n))
+            print("C"+str(i)+" : "+str(enc[len(enc)-1])+"\n")
         
-    #     print("encrypted ", enc)
+        print("encrypted ", enc)
 
 
-    #     dec = []
-    #     for j in range(len(enc)):
-    #         print("C"+str(j)+" : "+str(enc[j]))
-    #         P = powz(enc[j],d,n)
-    #         print("P"+str(j)+" : "+str(P).zfill(4)+"\n")
-    #         dec.append(int(str(P).zfill(4)[:2]))
-    #         dec.append(int(str(P).zfill(4)[2:]))
+        dec = []
+        for j in range(len(enc)):
+            print("C"+str(j)+" : "+str(enc[j]))
+            P = self.powz(enc[j],self.d,self.n)
+            print("P"+str(j)+" : "+str(P).zfill(4)+"\n")
+            dec.append(int(str(P).zfill(4)[:2]))
+            dec.append(int(str(P).zfill(4)[2:]))
 
-    #     print("decrypted ",dec)
+        print("decrypted ",dec)
 
 
-test = RSA()
+test = RSA(10)
 
 test.encryptRSA("a")
-
-
-
-
-# test primes, moet nog kyk hkm 40 goeie getal is
-# j = 0 
-# for i in range(0,100000):
-#     if miller_rabin(i,4) == True:
-#         j = j + 1
-#         print(i)
-
-# print("Total ",j)
-
-# 4 rounds kon almal so ver kry, dink dis fine

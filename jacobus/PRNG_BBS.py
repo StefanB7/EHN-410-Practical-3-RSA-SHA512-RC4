@@ -8,6 +8,9 @@ import time
 
 class PRNG_BBS:
     def __init__(self):
+
+        # increment the seed value to ensure random numbers are not the same when function is called repeatedly
+        self.seedInc = 0
         
         # Number of digits, thus between 10^(numDigits-1) to (10^numDigits)-1
         # Default case is 5 digits
@@ -50,8 +53,9 @@ class PRNG_BBS:
         min = max // 2
 
         while True:
-            testS = ((round(time.time()*1000)**3) % (max-min+1)) + min
+            testS = ((round(time.time()*1000)**3 + self.seedInc) % (max-min+1)) + min
             if self.extended_euclidean_algo(testS,max)[0] == 1:
+                self.seedInc = (self.seedInc + 1) % round(time.time()*1000)
                 return testS
     
     def getRandomNumberDigits(self, digits=None):
