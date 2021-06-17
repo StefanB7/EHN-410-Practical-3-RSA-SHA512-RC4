@@ -49,12 +49,23 @@ class RSA:
 
             self.n = self.p * self.q
 
-            # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
-            self.e = e
+            if e is not None:
+                # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
+                self.e = e
 
-            # Private key {d,n}, d calculated
-            self.d = d
-    
+                # Private key {d,n}, d calculated
+                self.d = d
+
+            else:
+                ed = self.getEandD(self.ETF(self.p,self.q))
+
+                # Public key {e,n}, e (calculate it), must be relatively prime to ETF(n) (gcd -> 1) and smaller than ETF(n)
+                self.e = ed[0]
+
+                # Private key {d,n}, d calculated
+                self.d = ed[1]
+
+
     # getters
     def get_p(self):
         return self.p
@@ -187,27 +198,14 @@ class RSA:
 
     # get largest value that is coprime
     def getEandD(self,phi):
-        for e in range(phi-2,-1,-1):
+        while True:
+            # choose random large e and test if coprime
+            e = self.BBS.getRandomNumberRange(int(phi*0.75),phi-2)
             if self.extended_euclidean_algo(e,phi)[0] == 1:
                 d = self.extended_euclidean_algo(e,phi)[1]
                 while d < 0:
                     d = d + phi
                 return [e,d]
-
-    # overflow error? 
-    # nie waarvan ek weet nie maar om veilig te bly gebruik ek maar normale pow
-
-    # a^b mod n 
-    # def powz(self,a,b,n):
-    #     b_bin = bin(b)[2:]
-
-    #     f = 1
-    #     for i in range(len(b_bin)):
-    #         f = pow(f,2,n)
-    #         if int(b_bin[i]) == 1:
-    #             f = (f*a) % n     
-
-    #     return f
 
     def cleanString(self,strText):
         # s = strText.lower()
@@ -216,15 +214,16 @@ class RSA:
 
         # return np.array(bytearray(strText.encode(encoding="ascii")),dtype=np.ubyte)
 
+    # pretty sure die zfill moet 3 wees want getalle kan 255 wees bv. !!!!!!!!!1
     def encryptRSA(self,plain):
         enc = []
         for i in range(len(plain)//2):
-            P = int(str(plain[2*i]).zfill(2) + str(plain[2*i +1]).zfill(2))
+            P = int(str(plain[2*i]).zfill(3) + str(plain[2*i +1]).zfill(3))
             # print("P"+str(i)+" : "+str(P))
             enc.append(pow(P,self.e,self.n))
             # print("C"+str(i)+" : "+str(enc[len(enc)-1])+"\n")
         
-        print("encrypted ", enc)
+        # print("encrypted ", enc)
 
         return enc
 
@@ -234,13 +233,14 @@ class RSA:
             # print("C"+str(j)+" : "+str(cipher[j]))
             P = pow(cipher[j],self.d,self.n)
             # print("P"+str(j)+" : "+str(P).zfill(4)+"\n")
-            dec.append(int(str(P).zfill(4)[:2]))
-            dec.append(int(str(P).zfill(4)[2:]))
-        print("decrypted ",dec)
+            dec.append(int(str(P).zfill(6)[:3]))
+            dec.append(int(str(P).zfill(6)[3:]))
+        # print("decrypted ",dec)
 
-test = RSA(5)
+        return dec
+# test = RSA(5)
 
-plain = [33,14,22,62,0,17,4,62,24,14,20,66]
+# plain = [33,14,22,62,0,17,4,62,24,14,20,66]
 
-enc = test.encryptRSA(plain)
-test.decryptRSA(enc)
+# enc = test.encryptRSA(plain)
+# test.decryptRSA(enc)
