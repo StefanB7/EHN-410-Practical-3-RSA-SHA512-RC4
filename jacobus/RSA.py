@@ -1,22 +1,17 @@
 # RSA
 
-# moet kan random getalle generate van n sekere lengte (bv 5 of 6 digiits) GLOBAL variable!
-
-# check lengte van n teenoor die lengte van die boodskap (of die byets wat encrypt moet word) 
-
 # skyrf in report hvl round van die miller rabin jy moet doen check 302 vir hvl rondtes connect dit met hoe groot prime gesoek word
 
 # https://crypto.stackexchange.com/questions/10805/how-does-one-deal-with-a-negative-d-in-rsa
 
 from PRNG_BBS import PRNG_BBS
-import numpy as np
 
 class RSA:
-    def __init__(self,primeDigits,blocksize=16,p=None,q=None,e=None,d=None):
+    def __init__(self,primeDigits,p=None,q=None,e=None,d=None):
         self.BBS = PRNG_BBS()
 
         if p is None:
-            pq = self.getRandomPrimes(blocksize,primeDigits)
+            pq = self.getRandomPrimes(primeDigits)
 
             # 1st prime number
             self.p = pq[0]
@@ -65,7 +60,6 @@ class RSA:
                 # Private key {d,n}, d calculated
                 self.d = ed[1]
 
-
     # getters
     def get_p(self):
         return self.p
@@ -90,9 +84,9 @@ class RSA:
         return (p-1)*(q-1)
 
     # get random prime numbers in the range 2^i < n <= 2^(i+1), a < p*q <= b
-    def getRandomPrimes(self,blocksize,length):
+    def getRandomPrimes(self,length):
 
-        minLength = len(str(int(np.ceil(np.sqrt(pow(2,blocksize))))))
+        minLength = 3
 
         # Since the two primes must be in a certain range the min and max values for both can be calculated:
         # Min value for primes is still set by the blocksize
@@ -101,11 +95,11 @@ class RSA:
             print("Min length set to: ",minLength)
             print("")
             length = minLength
-            minRange = np.ceil(np.sqrt(pow(2,blocksize)))
+            minRange = 506
         elif length > minLength:
             minRange = pow(10,length-1)
         else:
-            minRange = np.ceil(np.sqrt(pow(2,blocksize)))
+            minRange = 506
         
         # Max length set by length
         maxRange = (pow(10,length))-1
@@ -207,40 +201,24 @@ class RSA:
                     d = d + phi
                 return [e,d]
 
-    def cleanString(self,strText):
-        # s = strText.lower()
-        s = ''.join(str(ord(i))+',' for i in strText if i.isalpha())
-        return np.fromstring(s, dtype=int, sep=',')
-
-        # return np.array(bytearray(strText.encode(encoding="ascii")),dtype=np.ubyte)
-
     # pretty sure die zfill moet 3 wees want getalle kan 255 wees bv. !!!!!!!!!1
-    def encryptRSA(self,plain):
+    def encryptRSA(self,plain, publicKey, n):
         enc = []
         for i in range(len(plain)//2):
             P = int(str(plain[2*i]).zfill(3) + str(plain[2*i +1]).zfill(3))
             # print("P"+str(i)+" : "+str(P))
-            enc.append(pow(P,self.e,self.n))
+            enc.append(pow(P,publicKey,n))
             # print("C"+str(i)+" : "+str(enc[len(enc)-1])+"\n")
-        
-        # print("encrypted ", enc)
 
         return enc
 
-    def decryptRSA(self,cipher):
+    def decryptRSA(self,cipher, privateKey, n):
         dec = []
         for j in range(len(cipher)):
             # print("C"+str(j)+" : "+str(cipher[j]))
-            P = pow(cipher[j],self.d,self.n)
+            P = pow(cipher[j],privateKey,n)
             # print("P"+str(j)+" : "+str(P).zfill(4)+"\n")
             dec.append(int(str(P).zfill(6)[:3]))
             dec.append(int(str(P).zfill(6)[3:]))
-        # print("decrypted ",dec)
 
         return dec
-# test = RSA(5)
-
-# plain = [33,14,22,62,0,17,4,62,24,14,20,66]
-
-# enc = test.encryptRSA(plain)
-# test.decryptRSA(enc)
