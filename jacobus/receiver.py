@@ -1,4 +1,13 @@
+# Classes
 from RSA import RSA
+from RC4 import RC4
+
+# Libraries
+from PIL import Image
+import numpy as np
+
+# RC4 encryption object
+RC4 = RC4()
 
 class receiver:
     def __init__(self):
@@ -46,7 +55,7 @@ class receiver:
         self.rsaCipher = RSA(int(pLen))
     
     def createKeys(self,p,q):
-        self.rsaCipher = RSA(10,p,q)
+        self.rsaCipher = RSA(10,int(p),int(q))
     
     def getPublicKey(self):
         return self.rsaCipher.get_e()
@@ -59,5 +68,28 @@ class receiver:
     
     def decryptRC4(self):
         self.decRC4 = self.rsaCipher.decryptRSA(self.encRC4,self.rsaCipher.get_d(),self.rsaCipher.get_n())
-        print("RECEIVER RSA decrypted RC4 key : \t\t"," ".join([hex(x)[2:].zfill(2).upper() for x in self.decRC4]))
+        print("RECEIVER RSA decrypted RC4 key : \n"," ".join([hex(x)[2:].zfill(2).upper() for x in self.decRC4]))
         print("")
+    
+    def decryptMessage(self, encMsg):
+        print("RECEIVER Decrypted message received:")
+        self.decMsg = RC4.RC4_Decrypt(False,encMsg,self.decRC4) # remove nog die hash hier
+        print(self.decMsg)
+        print("")
+        if type(self.decMsg) is np.ndarray:
+            Image.fromarray(self.decMsg.astype(np.uint8)).save('jacobus\\rx_dec.png')
+    
+    def authenticateMessage(self):
+        print("RECEIVER Expected Hash:")
+        print("")
+        print("RECEIVER Received Hash:")
+        print("")
+
+        if True:
+            print("Message Authenticated")
+        else:
+            print("Message Authentication failed")
+    
+    def hashMessage(self):
+        print("") # delete die calculate the hash
+    

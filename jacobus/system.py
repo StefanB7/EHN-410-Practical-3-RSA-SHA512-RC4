@@ -1,5 +1,6 @@
 ########### SYSTEM to simulate transmitter and receiver operation ###########
 
+# Classes
 from RSA import RSA
 from PRNG_BBS import PRNG_BBS
 from receiver import receiver
@@ -37,14 +38,12 @@ RX.decryptRC4()
 print("Phase 2")
 
 TX.loadMessage()
+TX.hashMessage()
+TX.encryptMessage()
 
+########### Phase 3
 
-# doen hashing 
+print("Phase 3")
 
-# doen encrypting
-
-# Phase 3
-
-# doen decrypting
-
-# doen hashing
+RX.decryptMessage(TX.getEncryptedMessage())
+RX.authenticateMessage()
