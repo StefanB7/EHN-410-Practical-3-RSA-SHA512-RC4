@@ -19,7 +19,7 @@ class receiver:
         while not ((len(p) == 0 and len(q) == 0) or (len(p) != 0 and len(q) != 0)):
             print("Please provide both 'p' and 'q' values or none at all")
             print("")
-            p = input("To start a secure transmission c563hannel, Enter RECEIVER's p value of Press Enter: ")
+            p = input("To start a secure transmission channel, Enter RECEIVER's p value of Press Enter: ")
             print("")
             q = input("To start a secure transmission channel, Enter RECEIVER's q value of Press Enter: ")
             print("")
@@ -81,6 +81,7 @@ class receiver:
     
     def authenticateMessage(self):
         print("RECEIVER Expected Hash:")
+
         print("")
         print("RECEIVER Received Hash:")
         print("")

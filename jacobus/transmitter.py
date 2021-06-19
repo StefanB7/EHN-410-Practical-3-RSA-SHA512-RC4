@@ -16,6 +16,7 @@ RC4 = RC4()
 
 class transmitter:
     def __init__(self):
+        self.plain_plus_hash = ""
         print("")
         keyInput = input("TRANSMITTER Please Enter RC4 key or Press Enter : ")
         print("")
@@ -90,13 +91,13 @@ class transmitter:
         hash = SHA512(self.plain)
         hash.calculateHash()
         print(hash.printHash())
-        self.plain = self.plain + hash.getHashResultasString()
+        self.plain_plus_hash = self.plain + hash.getHashResultasString()
         print("")
 
     
     def encryptMessage(self):
         print("TRANSMITTER RC4 Encrypted Ciphertext:")
-        self.encMsg = RC4.RC4_Encrypt(False, self.plain, self.rc4Key)
+        self.encMsg = RC4.RC4_Encrypt(False, self.plain_plus_hash, self.rc4Key)
         if type(self.encMsg) is np.ndarray:
             print(self.encMsg)
             Image.fromarray(self.encMsg.astype(np.uint8)).save('jacobus\\tx_enc.png')
