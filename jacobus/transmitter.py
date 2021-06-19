@@ -2,6 +2,7 @@
 from PRNG_BBS import PRNG_BBS
 from RSA import RSA
 from RC4 import RC4
+from SHA512 import SHA512
 
 # Libraries
 from PIL import Image
@@ -86,8 +87,12 @@ class transmitter:
     
     def hashMessage(self):
         print("TRANSMITTER Plaintext Hash:")
-        print("CALCULATE EN SIT DIE HASH HIER")
+        hash = SHA512(self.plain)
+        hash.calculateHash()
+        print(hash.printHash())
+        self.plain = self.plain + hash.getHashResultasString()
         print("")
+
     
     def encryptMessage(self):
         print("TRANSMITTER RC4 Encrypted Ciphertext:")
