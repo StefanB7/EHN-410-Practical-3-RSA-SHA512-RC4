@@ -130,14 +130,15 @@ class receiver:
     
     def authenticateMessage(self):
         #Calculate the received message's hash value
-        hash = SHA512(self.decMsg)
-        hash.calculateHash()
-        expectedHashValue = hash.getHashResultasString()
+        hashauth = SHA512(self.decMsg)
+        hashauth.calculateHash()
         print("RECEIVER Expected Hash:")
-        print(hash.printHash())
+        print(hashauth.printHash())
+        expectedHashValue = hashauth.getHashResultasString()
+
         print("")
         print("RECEIVER Received Hash:")
-        " ".join([hex(ord(x))[2:].zfill(2).upper() for x in self.hashReceived])
+        print(" ".join([hex(ord(x))[2:].zfill(2).upper() for x in self.hashReceived]))
         print("")
 
         if self.hashReceived == expectedHashValue:
