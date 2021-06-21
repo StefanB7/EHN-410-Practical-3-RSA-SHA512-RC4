@@ -145,6 +145,3 @@ class receiver:
             print("Message Authenticated")
         else:
             print("Message Authentication failed")
-    
-    def hashMessage(self):
-        print("") # delete die calculate the hash
