@@ -54,9 +54,9 @@ class PRNG_BBS:
 
         while True:
             testS = pow(round(time.time()*1000)+self.seedInc,3,max-min+1) + min
+            self.seedInc = (self.seedInc + 1) % round(time.time()*1000)
 
             if self.extended_euclidean_algo(testS,max)[0] == 1:
-                self.seedInc = (self.seedInc + 1) % round(time.time()*1000)
                 return testS
     
     def getRandomNumberRange(self, min, max):
@@ -86,3 +86,4 @@ class PRNG_BBS:
         rndNumber = (int(bits,2) % (rndMax-rndMin+1)) + rndMin
 
         return rndNumber
+
