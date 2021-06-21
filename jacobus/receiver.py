@@ -88,14 +88,14 @@ class receiver:
         # Else if the plaintext is an image:
         elif (isinstance(self.decMsg_with_hash, np.ndarray)):
             #Get the dimensions of the image:
-            numRows = self.plain.shape[0]
-            numColumns = self.plain.shape[1]
-            numLayers = self.plain.shape[2]
+            numRows = self.decMsg_with_hash.shape[0]
+            numColumns = self.decMsg_with_hash.shape[1]
+            numLayers = self.decMsg_with_hash.shape[2]
 
             #Calculate the number of rows to add to fit the hash values calculated (into the first layer):
             numRowsAdded = math.ceil(64.0 / numColumns)
 
-            self.decMsg = np.zeros((numRows - numRowsAdded, numColumns, numLayers))
+            self.decMsg = np.ndarray((numRows - numRowsAdded, numColumns, numLayers), dtype="u1")
 
             #Copy the plaintext to the new plain_plus_hash array:
             for layer in range(numLayers):
@@ -106,7 +106,7 @@ class receiver:
 
             #Get the hash from the decrypted message:
             hashvalueString = ""
-            rowIndex = numRows
+            rowIndex = numRows - numRowsAdded
             columnIndex = 0
             index = 0
             while index < 64:
@@ -148,4 +148,3 @@ class receiver:
     
     def hashMessage(self):
         print("") # delete die calculate the hash
-    

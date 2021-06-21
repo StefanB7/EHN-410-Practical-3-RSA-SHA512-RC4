@@ -107,7 +107,7 @@ class transmitter:
             #Calculate the number of rows to add to fit the hash values calculated (into the first layer):
             numRowsAdded = math.ceil(64.0 / numColumns)
 
-            self.plain_plus_hash = np.zeros((numRows+numRowsAdded, numColumns, numLayers))
+            self.plain_plus_hash = np.ndarray(((numRows+numRowsAdded), numColumns, numLayers), dtype="u1")
 
             #Copy the plaintext to the new plain_plus_hash array:
             for layer in range(numLayers):
