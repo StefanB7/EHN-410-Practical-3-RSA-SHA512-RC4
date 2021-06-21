@@ -193,7 +193,7 @@ class SHA512(object):
         for i in range(len(self._hashBuffer)):
             currentBytearray = self._hashBuffer[i].to_bytes(8, "big")
 
-            outval = outval + "".join(ord(val) for val in currentBytearray)
+            outval = outval + "".join(chr(val) for val in currentBytearray)
 
         return outval
 

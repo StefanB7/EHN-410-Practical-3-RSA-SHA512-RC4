@@ -1,16 +1,19 @@
 # Classes
 from RSA import RSA
 from RC4 import RC4
+from SHA512 import SHA512
 
 # Libraries
 from PIL import Image
 import numpy as np
+import math
 
 # RC4 encryption object
 RC4 = RC4()
 
 class receiver:
     def __init__(self):
+        self.hashReceived = ""
         p = input("To start a secure transmission channel, Enter RECEIVER's p value of Press Enter: ")
         print("")
         q = input("To start a secure transmission channel, Enter RECEIVER's q value of Press Enter: ")
@@ -73,20 +76,71 @@ class receiver:
     
     def decryptMessage(self, encMsg):
         print("RECEIVER Decrypted message received:")
-        self.decMsg = RC4.RC4_Decrypt(False,encMsg,self.decRC4) # remove nog die hash hier
+        self.decMsg_with_hash = RC4.RC4_Decrypt(False,encMsg,self.decRC4) # remove nog die hash hier
+
+        #Get and remove the hash from the received plaintext:
+        #If the plaintext is a string:
+        if (isinstance(self.decMsg_with_hash, str)):
+            self.hashReceived = self.decMsg_with_hash[-64:]
+            self.decMsg = self.decMsg_with_hash[:-64]
+
+
+        # Else if the plaintext is an image:
+        elif (isinstance(self.decMsg_with_hash, np.ndarray)):
+            #Get the dimensions of the image:
+            numRows = self.plain.shape[0]
+            numColumns = self.plain.shape[1]
+            numLayers = self.plain.shape[2]
+
+            #Calculate the number of rows to add to fit the hash values calculated (into the first layer):
+            numRowsAdded = math.ceil(64.0 / numColumns)
+
+            self.decMsg = np.zeros((numRows - numRowsAdded, numColumns, numLayers))
+
+            #Copy the plaintext to the new plain_plus_hash array:
+            for layer in range(numLayers):
+                for row in range(numRows - numRowsAdded):
+                    for column in range(numColumns):
+                        self.decMsg[row][column][layer] = self.decMsg_with_hash[row][column][layer]
+
+
+            #Get the hash from the decrypted message:
+            hashvalueString = ""
+            rowIndex = numRows
+            columnIndex = 0
+            index = 0
+            while index < 64:
+                hashvalueString = hashvalueString + chr(self.decMsg_with_hash[rowIndex][columnIndex][0])
+                index += 1
+                columnIndex += 1
+                if columnIndex >= numColumns:
+                    columnIndex = 0
+                    rowIndex += 1
+
+            self.hashReceived = hashvalueString
+
+        # Plaintext is not of type image or string, return exception
+        else:
+            raise Exception("Receiver: Invalid message type encountered for SHA512 hashing (Decryption)")
+
         print(self.decMsg)
         print("")
         if type(self.decMsg) is np.ndarray:
             Image.fromarray(self.decMsg.astype(np.uint8)).save('jacobus\\rx_dec.png')
     
     def authenticateMessage(self):
+        #Calculate the received message's hash value
+        hash = SHA512(self.decMsg)
+        hash.calculateHash()
+        expectedHashValue = hash.getHashResultasString()
         print("RECEIVER Expected Hash:")
-
+        print(hash.printHash())
         print("")
         print("RECEIVER Received Hash:")
+        " ".join([hex(ord(x))[2:].zfill(2).upper() for x in self.hashReceived])
         print("")
 
-        if True:
+        if self.hashReceived == expectedHashValue:
             print("Message Authenticated")
         else:
             print("Message Authentication failed")

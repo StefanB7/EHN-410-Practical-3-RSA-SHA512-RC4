@@ -29,6 +29,9 @@ class SHA512(object):
           0x5fcb6fab3ad6faec,0x6c44198c4a475817]
 
     def __init__(self, InputMessage = None):
+        #Variable that tracks whether the hash of the input message has
+        #been calculated
+        self.hashCalculated = False
         if not(InputMessage is None):
             self.setMessage(InputMessage)
 
@@ -163,8 +166,36 @@ class SHA512(object):
         for i in range(numIterations):
             self.calculateSingleHash(self._message[i*128:(i+1)*128])
 
+        self.hashCalculated = True
+
         return self._hashBuffer
 
+    def printHash(self):
+        #If the hash has not been calculated, return nothing
+        if not(self.hashCalculated):
+            return ""
+
+        outval = ""
+        for i in range(len(self._hashBuffer)):
+            currentBytearray = self._hashBuffer[i].to_bytes(8, "big")
+
+            outval = outval + " ".join(hex(val)[2:].zfill(2).upper() for val in currentBytearray)
+            outval = outval + " "
+
+        return outval
+
+    def getHashResultasString(self):
+        #If the hash has not been calculated, return nothing
+        if not(self.hashCalculated):
+            return ""
+
+        outval = ""
+        for i in range(len(self._hashBuffer)):
+            currentBytearray = self._hashBuffer[i].to_bytes(8, "big")
+
+            outval = outval + "".join(chr(val) for val in currentBytearray)
+
+        return outval
 
     def rotateRight(self, value, numPositions):
         return ((value >> numPositions) | (value << (64 - numPositions))) & 0xFFFFFFFFFFFFFFFF
@@ -178,6 +209,10 @@ print(len(toets._message))
 
 
 print([hex(thing) for thing in toets.calculateHash()])
+print("As a string")
+print(toets.getHashResultasString())
+print(len(toets.getHashResultasString()))
+print(toets.printHash())
 
 p_File = Image.open('office.png')
 p_img = np.asarray(p_File)
