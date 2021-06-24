@@ -5,6 +5,7 @@
 
 # Permission granted by Gustan Naude
 import time
+import numpy as np
 
 class PRNG_BBS:
     def __init__(self):
@@ -87,3 +88,65 @@ class PRNG_BBS:
 
         return rndNumber
 
+
+# test = PRNG_BBS()
+# t = []
+# l_1 = []
+# score_1 = 0
+# l_0 = []
+# score_0 = 0
+# a = time.time()
+
+# for i in range(1000000):
+#     t.append(test.getRandomNumberRange(0,1))
+
+#     if t[len(t)-1] == 0:
+#         Zero = True
+#     else:
+#         Zero = False
+
+#     if i > 0:
+#         if t[len(t)-1] == t[len(t)-2] and Zero:
+#             score_0 += 1
+
+#         elif t[len(t)-1] != t[len(t)-2] and Zero:
+#             l_1.append(score_1)
+#             score_1 = 0
+#             score_0 += 1
+
+#         if t[len(t)-1] == t[len(t)-2] and not Zero:
+#             score_1 += 1
+
+#         elif t[len(t)-1] != t[len(t)-2] and not Zero:
+#             l_0.append(score_0)
+#             score_0 = 0
+#             score_1 += 1
+#     else:
+#         if Zero:
+#             score_0 += 1
+#         else:
+#             score_1 += 1
+
+# if score_1 != 0:
+#     l_1.append(score_1)
+
+# if score_0 != 0:
+#     l_0.append(score_0)
+
+
+# print("tyd: ", time.time()-a)
+
+# stats = np.array(t)
+# print("bits avg: ",np.mean(t))
+# print("bits std: ",np.std(t))
+
+# stats0 = np.array(l_0)
+# stats1 = np.array(l_1)
+
+# print("0 max: ",np.max(stats0))
+# print("0 avg: ",np.mean(stats0))
+# print("0 std: ",np.std(stats0))
+
+# print("1 max: ",np.max(stats1))
+# print("1 avg: ",np.mean(stats1))
+# print("1 std: ",np.std(stats1))

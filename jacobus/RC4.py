@@ -283,7 +283,7 @@ class RC4:
                         index += 1
 
             if bAlphaLayer:
-                cipherText = np.dstack((plainText, alpha_layer))
+                plainText = np.dstack((plainText, alpha_layer))
 
             if (inspect_mode):
                 return {"S-table": Sarchive, "Ciphertext": plainText.astype("int")}
