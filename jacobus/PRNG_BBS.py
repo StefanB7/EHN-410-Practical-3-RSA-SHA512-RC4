@@ -150,3 +150,4 @@ class PRNG_BBS:
 # print("1 max: ",np.max(stats1))
 # print("1 avg: ",np.mean(stats1))
 # print("1 std: ",np.std(stats1))
+
