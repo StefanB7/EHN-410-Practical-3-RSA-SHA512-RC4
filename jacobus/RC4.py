@@ -1,6 +1,7 @@
 # EHN 410 - Practical 3 - 2021
 # RC4 Encryption and Decryption
 # Group 7
+# Jacobus Oettle & Stefan Buys
 # Created: 14 May 2021 by Stefan Buys
 
 import numpy as np
